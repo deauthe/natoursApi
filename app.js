@@ -122,6 +122,37 @@ const DeleteTour = (req, res) => {
   });
 };
 
+const getAllusers = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    messsage: 'this path is not yet defined',
+  });
+};
+const createNewUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    messsage: 'this path is not yet defined',
+  });
+};
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    messsage: 'this path is not yet defined',
+  });
+};
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    messsage: 'this path is not yet defined',
+  });
+};
+const getReqUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    messsage: 'this path is not yet defined',
+  });
+};
+
 //ROUTE HANDLERS
 
 // app.get('/api/v1/tours', getAllTours);
@@ -130,16 +161,35 @@ const DeleteTour = (req, res) => {
 // app.patch('/api/v1/tours/:id', UpdateTour);
 // app.delete('api/v1/tours/:id', DeleteTour);
 
-app
-  .route('/api/v1/tours')
+const tourRouter = express.Router();
+const userRouter = express.Router();
+
+tourRouter //instead of using "app", we use a mounted route, this makes it like the children route
+  .route('/')
   .get(getAllTours)
   .post(CreateNewTour);
 
-app
-  .route('/api/v1/tours/:id')
+tourRouter
+  .route('/:id')
   .get(getReqTour)
   .patch(UpdateTour)
   .delete(DeleteTour);
+
+userRouter
+  .route('/')
+  .get(getAllusers)
+  .post(createNewUser);
+
+userRouter
+  .route('/:id')
+  .get(getReqUser)
+  .patch(updateUser)
+  .delete(deleteUser);
+
+//mounting the routers has to be done after they are declared
+
+app.use('/api/v1/tours', tourRouter); //this is called mounting the router
+app.use('/api/v1/users', userRouter);
 
 //SERVER START
 const port = 3000;
