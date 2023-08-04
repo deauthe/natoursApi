@@ -7,7 +7,29 @@ const tours = JSON.parse(
   )
 );
 
-module.exports.getAllTours = (req, res) => {
+exports.checkID = (req, res, next, val) => {
+  //since this is quite above in the middleWare queue, req will pass through this before
+  //encountering below middleWare, this saves us repeated checking of valid id values
+  if (val > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'invalid id',
+    });
+  }
+  next();
+};
+
+exports.checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'bad request',
+    });
+  }
+  next();
+};
+
+exports.getAllTours = (req, res) => {
   //route handler: to be called when a req is made at a route
   console.log(req.requestTime);
   res.status(200).json({
@@ -20,18 +42,11 @@ module.exports.getAllTours = (req, res) => {
   });
 };
 
-module.exports.getReqTour = (req, res) => {
+exports.getReqTour = (req, res) => {
   console.log(req.params);
   const id = req.params.id * 1; //multiplying by 1 makes the string into a number if it is one
-  if (id > tours.length) {
-    //id exceeds total tours
-    return res.status(404).json({
-      status: 'fail',
-      message: 'invalid id',
-    });
-  }
 
-  module.exports.reqTour = tours.find(
+  const reqTour = tours.find(
     (el) => el.id === id
   );
 
@@ -46,7 +61,7 @@ module.exports.getReqTour = (req, res) => {
   });
 };
 
-module.exports.CreateNewTour = (req, res) => {
+exports.CreateNewTour = (req, res) => {
   console.log(req.body);
   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign(
@@ -66,18 +81,13 @@ module.exports.CreateNewTour = (req, res) => {
         },
       }); //creation
     }
-  ); //using the sync method will block the event loop as were in a callback function
-  res.send('done'); //always send something to complete the req (but .json also sends a response, and we cant use 2 in 1, so use either or)
-};
+  );
+}; //using the sync method will block the event loop as were in a callback function
+//always send something to complete the req (but .json also sends a response, and we cant use 2 in 1, so use either or)
 
-module.exports.UpdateTour = (req, res) => {
+exports.UpdateTour = (req, res) => {
   //method doesn't really delete patch, just an example
-  if (req.params.id * 1 > tours.length) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'invalid id',
-    });
-  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -85,15 +95,8 @@ module.exports.UpdateTour = (req, res) => {
     },
   });
 };
-
-module.exports.DeleteTour = (req, res) => {
+exports.DeleteTour = (req, res) => {
   //method doesn't really delete shit, just an example
-  if (req.params.id * 1 > tours.length) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'invalid id',
-    });
-  }
   res.status(204).json({
     status: 'success',
     data: null,

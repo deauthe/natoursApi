@@ -5,8 +5,12 @@ const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 
 //MIDDLEWARES
-app.use(morgan('dev')); //middleware to see requests made, in the console
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev')); //middleware to see requests made, in the console
+}
+
 app.use(express.json()); //this is middleware, to modify req content
+app.use(express.static(`${__dirname}/public/`));
 app.use((req, res, next) => {
   //this is middleWare
   //by default applies to all the req made in the server
@@ -37,8 +41,4 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter); //this is called mounting the router
 app.use('/api/v1/users', userRouter);
 
-//SERVER START
-const port = 3000;
-app.listen(port, () => {
-  console.log(`app running on port : ${port}`);
-});
+module.exports = app;
