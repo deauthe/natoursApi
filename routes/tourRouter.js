@@ -5,20 +5,18 @@ const {
   getReqTour,
   UpdateTour,
   DeleteTour,
-  checkID,
   checkBody,
 } = require('./../controllers/tourController');
 
 const router = express.Router();
 //this is mounting routes
 
-router.param('id', checkID);
-router;
+// router.param('id', checkID);
 
 router //instead of using "app", we use a mounted route, this makes it like the children route
   .route('/')
   .get(getAllTours)
-  .post(checkBody, CreateNewTour); //chaining middleware
+  .post(CreateNewTour); //chaining middleware
 
 router
   .route('/:id')

@@ -16,25 +16,10 @@ mongoose
     useFindAndModify: false,
   })
   .then(() => {
-    console.log('connect to db succesfull');
+    console.log('connection to db succesfull');
   });
 
 // console.log(process.env);
-
-const testTour = new Tour({
-  name: 'the forest Hiker',
-  rating: 3,
-  price: 550,
-});
-
-testTour
-  .save()
-  .then((doc) => {
-    console.log(doc);
-  })
-  .catch((err) => {
-    console.log(`ERROR: ${err}`);
-  });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
