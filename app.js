@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const morgan = require('morgan');
+const morgan = require('morgan'); //dev tool to get requests made displayed in the console
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 

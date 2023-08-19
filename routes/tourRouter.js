@@ -6,12 +6,17 @@ const {
   UpdateTour,
   DeleteTour,
   checkBody,
+  aliasTopTours,
 } = require('./../controllers/tourController');
 
 const router = express.Router();
 //this is mounting routes
 
 // router.param('id', checkID);
+
+router
+  .route('/top-5-cheap')
+  .get(aliasTopTours, getAllTours);
 
 router //instead of using "app", we use a mounted route, this makes it like the children route
   .route('/')
