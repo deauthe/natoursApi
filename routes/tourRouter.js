@@ -5,7 +5,6 @@ const {
   getReqTour,
   UpdateTour,
   DeleteTour,
-  checkBody,
   aliasTopTours,
 } = require('./../controllers/tourController');
 
