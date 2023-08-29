@@ -26,7 +26,7 @@ class APIFeatures {
       /\b(gte,gt,lte,lt)\b/g,
       (match) => `$${match}`,
     ); //added dollar sign after every match to match mongo db query
-    //  tehniques if not already taken care of when requesting with the api
+    //  techniques if not already taken care of when requesting with the api
     // /\b(gte,gt,lte,lt)\b/ is a regular expression in js. study more about regular expressions
 
     this.query = this.query.find(
@@ -50,6 +50,7 @@ class APIFeatures {
       //req.query.sort is a part of the object query
       //so if the req has a query to sort,
       //it calls the sort method from mongoose
+      //this.query is the output that wer'e sort of chaining with every method in apiFeatures
     } else {
       this.query = this.query.sort('-createdAt'); //negative sign means descending order
     }

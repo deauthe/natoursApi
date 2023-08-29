@@ -22,6 +22,11 @@ mongoose
     console.log('db connected to import files'),
   );
 
+const toursRaw = fs.readFileSync(
+  `${__dirname}/tours-simple.json`,
+  'utf-8',
+);
+
 const tours = JSON.parse(
   fs.readFileSync(
     `${__dirname}/tours-simple.json`,
@@ -33,8 +38,9 @@ const tours = JSON.parse(
 
 const importData = async () => {
   try {
-    await Tour.create(tours);
+    const toursImp = await Tour.create(tours);
     console.log('data succesfully loaded');
+    console.log(toursImp[1]);
     process.exit();
   } catch (err) {
     console.log(err);
