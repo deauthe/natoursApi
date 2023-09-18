@@ -16,6 +16,7 @@ const handleDuplicateFieldsDB = (err) => {
 
 const handleValidationErrorDB = (err) => {
   const errors = Object.values(err.errors).map(
+    //The Object.values() static method returns an array of a given object's own enumerable string-keyed property values.
     (el) => el.message,
   );
 
@@ -25,9 +26,24 @@ const handleValidationErrorDB = (err) => {
   return new AppError(message, 400);
 };
 
+const handleJWTerror = () => {
+  return new AppError(
+    'Invalid token, please sign in again',
+    401,
+  );
+};
+
+const handleJWTExpiredError = () => {
+  return new AppError(
+    'token expired, please login again',
+    401,
+  );
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
+    source: 'from error handler',
     error: err,
     messsage: err.message,
     stack: err.stack, //this tells us where the err happened
@@ -71,6 +87,10 @@ module.exports = (err, req, res, next) => {
       error = handleDuplicateFieldsDB(error);
     if (error.name === 'ValidationError')
       error = handleValidationErrorDB(error);
+    if (error.name === 'JsonWebTokenError')
+      error = handleJWTerror();
+    if (error.name === 'TokenExpiredError')
+      error = handleJWTExpiredError();
 
     sendErroProd(error, res);
   }

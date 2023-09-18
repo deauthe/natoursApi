@@ -5,27 +5,62 @@ const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 const AppError = require('./utils/appError');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xssClean = require('xss-clean');
+const hpp = require('hpp');
+const reviewRouter = require('./routes/reviewRouter');
 
-//MIDDLEWARES
+//GLOBAL MIDDLEWARES
+//SECURITY HTTP HEADERS
+app.use(helmet());
+
+//DEVELOPMENT LOGGING
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); //middleware to see requests made, in the console
 }
 
-app.use(express.json()); //this is middleware, to modify req content
-app.use(express.static(`${__dirname}/public/`));
-app.use((req, res, next) => {
-  //this is middleWare
-  //by default applies to all the req made in the server
-  //specify route to handle individual req with specified middleWare
-  //app.route is in itself a middleWare for a specific route
-  //but when res.json has been sent from another middleware, this mean the req/res cycle has ended and the next middleWare will not be called
-  //the order of middleWare is very important as to what will be executed
-  // console.log('hello from middleWare');
-  next(); //without next function the req/res cycle ends, and it's basically an error
-  //so either do a res.send or res.json to end the cycle manually or let the next middleWare run
+//LIMITTING REQUESTS
+const limiter = rateLimit({
+  //prevents the same IP to do 'max' number of req in windowMs of reset time
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'too many requests form this ip, try again in an hour',
 });
+
+app.use('/api', limiter); //uses the limiter middleware only on the routes that start with /api
+
+//BODY PARSER,READING DATA FROM BODY INTO REQ.BODY
+app.use(express.json({ LIMIT: '10KB' })); //this is middleware, to modify req content
+
+//DATA SANITIZATION AGAINST NoSQL QUERY INJECTION
+app.use(mongoSanitize());
+
+//DATA SANITIZATION AGAINST XSS
+app.use(xssClean());
+
+//PREVENT PARAMETER POLLUTION
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price', //whitelisting all the parameters where pollution is allowed
+    ],
+  }),
+);
+
+//SERVING STATIC FILES
+app.use(express.static(`${__dirname}/public/`));
+
+//TEST MIDDDLEWARE
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString(); //we can use this variable anywhere now
+  //console.log(req.headers)
   next();
 });
 
@@ -42,6 +77,7 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter); //this is called mounting the router
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   //error handling for all other routes, should be defined after all other valid routers like above
@@ -51,12 +87,7 @@ app.all('*', (req, res, next) => {
   //     message: `can't find ${req.originalUrl} on this server`,
   //   });
 
-  next(
-    new AppError(
-      `can't find ${req.originalUrl} on this server`,
-      404,
-    ),
-  ); //wnv we pass an arg into a next function, express knows that it's an error, so it skips all the other middleWare and jumps straight
+  next(new AppError(`can't find ${req.originalUrl} on this server`, 404)); //wnv we pass an arg into a next function, express knows that it's an error, so it skips all the other middleWare and jumps straight
   //into our global error handling middleWare
 });
 
